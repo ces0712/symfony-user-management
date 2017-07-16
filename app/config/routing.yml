@@ -1,0 +1,8 @@
+#fos_user:
+    #resource: "@FOSUserBundle/Resources/config/routing/all.xml"
+#fos_user_group:
+    #resource: "@FOSUserBundle/Resources/config/routing/group.xml"
+    #prefix: /group
+
+routing_rest_api:
+  resource: routing_rest.yml

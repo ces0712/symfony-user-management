@@ -1,0 +1,74 @@
+# Learn more about services, parameters and containers at
+# https://symfony.com/doc/current/service_container.html
+parameters:
+    #parameter_name: value
+    crv.user.entity: 'AppBundle\Entity\User'
+
+services:
+    #service_name:
+    #    class: AppBundle\Directory\ClassName
+    #    arguments: ['@another_service_name', 'plain_value', '%parameter_name%']
+    crv.doctrine_entity_repository.user:
+        class: AppBundle\Entity\Repository\UserRepository
+        factory: ["@doctrine", getRepository]
+        arguments:
+            - AppBundle\Entity\User
+
+    # -- REPOSITORY --
+    crv.repository.common_doctrine_repository:
+        class: AppBundle\Repository\Doctrine\CommonDoctrineRepository
+        arguments:
+            - "@doctrine.orm.entity_manager"
+
+    crv.repository.doctrine_user_repository:
+        class: AppBundle\Repository\Doctrine\UserRepository
+        arguments:
+            - "@crv.repository.common_doctrine_repository"
+            - "@doctrine.orm.entity_manager"
+
+    crv.form.type.restricted_user:
+        class: AppBundle\Form\Type\UserType
+        arguments:
+            - "%crv.user.entity%"
+        tags:
+            - { name: form.type, alias: restricted_user_form }
+    
+    crv.form.handler.restricted_user_form_handler:
+        class: AppBundle\Form\Handler\FormHandler
+        arguments:
+            - "@form.factory"
+            - "@crv.form.type.restricted_user"
+
+    crv.repository.restricted_user_repository:
+        class: AppBundle\Repository\Restricted\UserRepository
+        arguments:
+            - "@crv.repository.doctrine_user_repository"
+            - "@security.authorization_checker"
+
+    crv.security.authorization.voter.user_voter:
+        class:      AppBundle\Security\Authorization\Voter\UserVoter
+        public:     false
+        tags:
+           - { name: security.voter }
+          
+    crv.handler.restricted_user_handler:
+        class: AppBundle\Handler\UserHandler
+        arguments:
+            - "@crv.form.handler.restricted_user_form_handler"
+            - "@crv.repository.restricted_user_repository"
+
+    app.form.registration:
+        class: AppBundle\Form\Type\RegistrationType
+        tags:
+            - { name: form.type, alias: app_user_registration }
+
+    crv.form.type.user_group:
+        class: AppBundle\Form\Type\GroupUserType
+        tags:
+            - { name: form.type, alias: app_user_group }
+
+    crv.form.handler.user_group_form_handler:
+        class: AppBundle\Form\Handler\FormHandler
+        arguments:
+            - "@form.factory"
+            - "@crv.form.type.user_group"

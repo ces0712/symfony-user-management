@@ -1,0 +1,7 @@
+# /var/serializer/FOSUB/Model.User.yml
+
+FOS\UserBundle\Model\User:
+    exclusion_policy: all
+
+FOS\UserBundle\Model\Group:
+    exclusion_policy: all
